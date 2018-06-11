@@ -63,6 +63,9 @@ class window:
         self.visible = True
         self.surface = surface
         self.title = windowtitle
+        self.offset_x = 0
+        self.offset_y = 0
+        self.rectangle_dragging = False
         self.window_rect = pygame.Rect(window_xpos, window_ypos, window_width, window_heigth)
         self.windownavigationbar1_width = 100
         self.windowbuttontray1_width = 18*3
@@ -70,10 +73,26 @@ class window:
         self.windowtitlebar1 = windowtitlebar(self.surface, self.title, self.windownavigationbar1_width, self.windowbuttontray1_width, self.window_rect)
         self.windowbuttontray1 = windowbuttontray(self.surface, self.windowbuttontray1_width, self.window_rect)
 
+    def mousedown(self, *args):
+        self.curmousepos = args[0]
+        if self.windowtitlebar1.windowtitlebar_rect.collidepoint(self.curmousepos):
+            self.rectangle_dragging = True;
+            mouse_x, mouse_y = self.curmousepos
+            self.offset_x = self.window_rect.left - mouse_x
+            self.offset_y = self.window_rect.top - mouse_y
+
+    def mouseup(self):
+        if self.rectangle_dragging:
+            self.rectangle_dragging = False;
+
+    def mousemotion(self, *args):
+        if self.rectangle_dragging:
+            mouse_x, mouse_y = args[0]
+            self.window_rect.left = mouse_x + self.offset_x
+            self.window_rect.top = mouse_y + self.offset_y
+
     def update(self, *args):
         if self.visible:    # only update the window if it is visible
-            self.window_rect.left = args[0]
-            self.window_rect.top = args[1]
             pygame.draw.rect(self.surface, (255,255,255), self.window_rect, 0)
             self.windownavigationbar1.update(self.window_rect)
             self.windowtitlebar1.update(self.window_rect)
@@ -99,8 +118,6 @@ def main():
     curwindowypos = 100
     curwindowwidth = 400
     curwindowheight = 400
-    offset_x = 0
-    offset_y = 0
 
     bg_image = pygame.image.load("spacee-740x463.jpg")
 
@@ -110,7 +127,7 @@ def main():
 
     # define a variable to control the main loop
     running = True
-    rectangle_dragging = False
+    
     clock = pygame.time.Clock()
     fps = 30
     # main loop
@@ -119,26 +136,15 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    mousepos = event.pos
-                    if mainwindow.windowtitlebar1.windowtitlebar_rect.collidepoint(event.pos):
-                        rectangle_dragging = True;
-                        mouse_x, mouse_y = event.pos
-                        offset_x = curwindowxpos - mouse_x
-                        offset_y = curwindowypos - mouse_y
+                    mainwindow.mousedown(event.pos)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:            
-                    rectangle_dragging = False
+                    mainwindow.mouseup()
 
             elif event.type == pygame.MOUSEMOTION:
-                if rectangle_dragging:
-                    mouse_x, mouse_y = event.pos
-                    curwindowxpos = mouse_x + offset_x
-                    curwindowypos = mouse_y + offset_y
-                    #rectangle.x = mouse_x + offset_x
-                    #rectangle.y = mouse_y + offset_y
-                #if Player.rect.collidepoint(event.pos):
-            #        Player.click = True
+                mainwindow.mousemotion(event.pos)
+
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
                 # change the value to False, to exit the main loop
@@ -147,7 +153,7 @@ def main():
 
         screen.blit(bg_image, (0, 0))
 
-        mainwindow.update(curwindowxpos, curwindowypos)
+        mainwindow.update()
         # draw anim
         #dirty_rect = screen.blit(100, 240)
         # update screen
