@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>62e52934-0772-4f2c-9b95-72659ad2fb14</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>module3.py</StartupFile>
+    <StartupFile>particle.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,6 +21,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FakePlate.py" />
+    <Compile Include="particle.py" />
     <Compile Include="module3.py" />
     <Compile Include="module2.py" />
     <Compile Include="module1.py">

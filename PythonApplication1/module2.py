@@ -119,14 +119,15 @@ def main():
     curwindowwidth = 400
     curwindowheight = 400
 
-    bg_image = pygame.image.load("spacee-740x463.jpg")
-
+    bg_image = pygame.image.load("carrearend.jpg")
+    bg_image = pygame.transform.scale(bg_image, (1320,990))
     # create a surface on screen that has the size of screen_width x screen_height
     screen = pygame.display.set_mode((screen_width,screen_height))
     mainwindow = window(screen,"Main Window", curwindowxpos, curwindowypos, curwindowwidth, curwindowheight)
 
     # define a variable to control the main loop
     running = True
+    licplatefont = pygame.font.SysFont('Courier New', 80, True)
     
     clock = pygame.time.Clock()
     fps = 30
@@ -151,9 +152,18 @@ def main():
                 running = False
         clock.tick(fps)
 
-        screen.blit(bg_image, (0, 0))
-
+        screen.blit(bg_image, (-280, -270))
+        
         mainwindow.update()
+        #licplacerect = pygame.Rect(200, 200, 400, 120)
+        #licplacecountryrect = pygame.Rect(200, 200, 40, 120)
+        #pygame.draw.rect(screen, (230,255,0), licplacerect, 0)
+        #pygame.draw.rect(screen, (0,0,255), licplacecountryrect, 0)
+        #licplatetextsurface = licplatefont.render("BRILMBO", False, (0, 0, 0))
+        #screen.blit(licplatetextsurface,(250, 210))
+        #pygame.draw.rect(screen, (0,0,0), licplacerect, 2)
+
+
         # draw anim
         #dirty_rect = screen.blit(100, 240)
         # update screen
