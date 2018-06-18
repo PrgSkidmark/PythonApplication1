@@ -19,7 +19,7 @@ class particle:
         self.vector_y = random.randint(-2, 2)
         self.color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
         self.anomoly = anomoly
-        self.anomolygravity = random.randint(particle_distance/2, particle_distance)
+        self.anomolygravity = random.randint(particle_distance/2, particle_distance)+50
     def update(self, *args):
         self.x += self.vector_x
         self.y += self.vector_y
@@ -70,19 +70,19 @@ class particle_generator:
             #pygame.draw.circle(self.surface, (100,100,100), (particle[0], particle[1]), particle[2], 0)
             #gfxdraw.circle(self.surface, particle[0], particle[1], particle[2], (100,100,100))
             #gfxdraw.pixel(self.surface, particle[0], particle[1], (100,100,100))
-        for anomolyparticle in self.anomoly_array:
-            for particle in self.particle_array:
-                if (not self.pausing):
-                    particle.update()
-                gfxdraw.filled_circle(self.surface, particle.x, particle.y, particle.size, particle.color)
-                if (abs(anomolyparticle.x-particle.x) < anomolyparticle.anomolygravity) and (abs(anomolyparticle.y-particle.y) < anomolyparticle.anomolygravity):
-                    for particle2 in self.particle_array:
-                        if (abs(particle2.x-particle.x) < anomolyparticle.anomolygravity) and (abs(particle2.y-particle.y) < anomolyparticle.anomolygravity) and (particle.size == particle2.size):
-                            rednumber = (particle.color[0]+particle2.color[0])/2
-                            greennumber = (particle.color[1]+particle2.color[1])/2
-                            bluenumber = (particle.color[2]+particle2.color[2])/2
-                            color = (int(rednumber),int(greennumber),int(bluenumber))
-                            pygame.draw.aaline(self.surface, color, (particle.x,particle.y),(particle2.x,particle2.y), 1)
+        #for anomolyparticle in self.anomoly_array:
+        for particle in self.particle_array:
+            if (not self.pausing):
+                particle.update()
+            gfxdraw.filled_circle(self.surface, particle.x, particle.y, particle.size, particle.color)
+            if (abs(anomolyparticle.x-particle.x) < anomolyparticle.anomolygravity) and (abs(anomolyparticle.y-particle.y) < anomolyparticle.anomolygravity):
+                for particle2 in self.particle_array:
+                    if (abs(particle2.x-particle.x) < anomolyparticle.anomolygravity) and (abs(particle2.y-particle.y) < anomolyparticle.anomolygravity) and (particle.size == particle2.size):
+                        rednumber = (particle.color[0]+particle2.color[0])/2
+                        greennumber = (particle.color[1]+particle2.color[1])/2
+                        bluenumber = (particle.color[2]+particle2.color[2])/2
+                        color = (int(rednumber),int(greennumber),int(bluenumber))
+                        pygame.draw.aaline(self.surface, color, (particle.x,particle.y),(particle2.x,particle2.y), 1)
 
     def reset(self, *args):
         self.particle_array = [] # start with an empty list
@@ -117,8 +117,9 @@ def main():
     bg_image = pygame.image.load("spacee-740x463.jpg")
 
     # create a surface on screen that has the size of screen_width x screen_height
-    screen = pygame.display.set_mode((screen_width,screen_height))
-    myparticle_generator = particle_generator(screen, 100, 100, 1);
+    #screen = pygame.display.set_mode((screen_width,screen_height))
+    screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+    myparticle_generator = particle_generator(screen, 200, 100, 200);
     # define a variable to control the main loop
     running = True
     clock = pygame.time.Clock()
@@ -140,6 +141,8 @@ def main():
                     myparticle_generator.reset()
                 if event.key == pygame.K_SPACE:
                     myparticle_generator.pause()
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:

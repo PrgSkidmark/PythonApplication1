@@ -419,8 +419,8 @@ def main():
     #bg_image = pygame.image.load("spacee-740x463.jpg")
 
     # create a surface on screen that has the size of screen_width x screen_height
-    screen = pygame.display.set_mode((screen_width,screen_height))
-    #screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+    #screen = pygame.display.set_mode((screen_width,screen_height))
+    screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
     curwindowwidth = screen.get_width()
     curwindowheight = screen.get_height()
 
