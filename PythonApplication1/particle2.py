@@ -167,10 +167,44 @@ class particle_connector:
                 #new_frame = (current_destparticle, None, 0)
                 #self.frames_array.append(new_frame)
             frame_number += 1
+    def updateanomoly2(self, *args):
+        # anomolies will attach to particles around it
+        for particle1 in self.particle_array:
+            if (particle1.isanomoly == True):
+                anomolyparticle = particle1
+            for particle2 in self.particle_array:
+                if ((abs(particle1.y - anomolyparticle.y) <= anomolyparticle.particle_distance) and (abs(particle1.x - anomolyparticle.x) <= anomolyparticle.particle_distance) and (abs(particle2.y - anomolyparticle.y) <= anomolyparticle.particle_distance) and (abs(particle2.x - anomolyparticle.x) <= anomolyparticle.particle_distance)):
+                    new_frame = (particle1, particle2, 1)
+                    #check_frame = (particle2, particle1, 1)
+                    #check_frame_index = -1
+                    #try:
+                    #    check_frame_index = self.frames_array.index(check_frame) > -1
+                    #except:
+                    #    check_frame_index = -1
+                    #if (check_frame_index >= 0):
+                    self.frames_array.append(new_frame)
+        frame_number = 0
+        for frame in self.frames_array:
+            if ((frame[2] == -1) or (frame[0].changeddirection == True)):
+                self.frames_array.pop(frame_number)
+            elif (frame[2] == 0):
+                self.finddestination(frame, frame_number, "any")
+            elif ((frame[2] > 0) and (frame[2] < self.frame_count)):
+                self.renderframe(frame, frame_number, "any")
+            elif (frame[2] >= self.frame_count):
+                current_destparticle = frame[1]
+                self.frames_array.pop(frame_number)
+                # When the frame is complete look for new dest particle
+                #new_frame = (current_destparticle, None, 0)
+                #self.frames_array.append(new_frame)
+            frame_number += 1
+
     def update(self, *args):
         if (self.currentstyle == 1):
             self.updateanomoly()
         if (self.currentstyle == 2):
+            self.updateanomoly2()
+        if (self.currentstyle == 3):
             self.updatelinedrop()
 
 class particle_generator:
@@ -232,9 +266,9 @@ def main():
 
     screen_width = 1500
     screen_height = 800
-    particle_count = 500
-    particle_maxdistancefromother = 200
-    particle_anomolycount = 5
+    particle_count = 300
+    particle_maxdistancefromother = 100
+    particle_anomolycount = 1
     bg_image = pygame.image.load("spacee-740x463.jpg")
 
     # create a surface on screen that has the size of screen_width x screen_height
