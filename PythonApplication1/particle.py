@@ -6,6 +6,9 @@ from collections import namedtuple
 from pygame import gfxdraw
 
 ui_id = namedtuple("ui_id", "Owner Item Index")
+class motion:
+    pass
+
 
 class particle:
     def __init__(self, width, height, anomoly, particle_distance):

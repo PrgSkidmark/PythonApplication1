@@ -45,24 +45,39 @@ class particle:
     def update(self, *args):
         self.particle_motion.update(self)
 
-class particle_motion_none():
+class paticle_placement(object):
+    pass
+
+class paticle_motion(object):
+    pass
+
+class particle_motion_none(paticle_motion):
+    #motion.__init__(self)
     def update(self, particle):
         particle.isattop = False
         particle.changeddirection = False
 
-class particle_motion_twirl():
+class particle_motion_twirl(paticle_motion):
     def __init__(self, *args):
         self.t = 0
         self.adder = (2*3.14158)/360
         self.degree = 1
-        self.a = 75
-        self.b = 25
+        self.a = 20
+        self.b = 5
         self.center_x = args[0]
         self.center_y = args[1]
 
     def update(self, particle):
-        particle.isattop = False
-        particle.changeddirection = False
+        if particle.y > particle.height:
+            particle.isattop = False
+            particle.y = -10
+            particle.changeddirection = True
+        else:
+            particle.isattop = False
+            particle.changeddirection = False
+        particle.y += particle.vector_y
+        self.center_x = particle.x
+        self.center_y = particle.y
         particle.x = self.center_x + int(self.a * math.cos(self.adder*self.degree))
         particle.y = self.center_y + int(self.b * math.sin(self.adder*self.degree))
 
@@ -71,7 +86,7 @@ class particle_motion_twirl():
             self.degree = 1
 
 
-class particle_motion_wrapsides():
+class particle_motion_wrapsides(paticle_motion):
     def update(self, particle):
         particle.x += particle.vector_x
         particle.y += particle.vector_y
@@ -100,7 +115,7 @@ class particle_motion_wrapsides():
             particle.isattop = False
             particle.changeddirection = False
 
-class particle_motion_bouncesides():
+class particle_motion_bouncesides(paticle_motion):
     #def __init__(self):
     #    self.particle = particle;
 
@@ -126,17 +141,17 @@ class particle_motion_bouncesides():
             particle.isattop = True
             particle.y = 1
             particle.vector_x = random.randint(-2, 2)
-            particle.vector_y = self.vector_y*-1
+            #particle.vector_y = self.vector_y*-1
             particle.changeddirection = True
         else:
             particle.isattop = False
             particle.changeddirection = False
         while (particle.vector_x == 0):
             particle.vector_x = random.randint(-2, 2)
-        while (particle.vector_y == 0):
-            particle.vector_y = random.randint(-2, 2)
+        #while (particle.vector_y == 0):
+        #    particle.vector_y = random.randint(-2, 2)
 
-class particle_motion_down_straight():
+class particle_motion_down_straight(paticle_motion):
     def update(self, particle):
         #particle.x += particle.vector_x
         particle.y += particle.vector_y
@@ -148,7 +163,7 @@ class particle_motion_down_straight():
             particle.isattop = False
             particle.changeddirection = False
 
-class particle_motion_down_zigzag():
+class particle_motion_down_zigzag(paticle_motion):
     def update(self, particle):
         particle.x += particle.vector_x
         particle.y += particle.vector_y
@@ -362,7 +377,7 @@ class particle_generate_wraparound(particle_generator):
         particle_generator.particle_maxdistancefromother = particle_maxdistancefromother
         particle_generator.particle_array = [] # start with an empty list
         particle_generator.anomoly_count = anomoly_count
-        self.myparticlemotion = particle_motion_wrapsides()
+        self.myparticlemotion = particle_motion_bouncesides()
         particle_number = 1
         for particle_number in range(self.particle_count):
             isAnomoly = False
@@ -478,7 +493,7 @@ class particle_generate_twirl(particle_generator):
         particle_generator.surface = surface
         particle_generator.surface_width = surface.get_width()
         particle_generator.surface_height = surface.get_height()
-        particle_generator.particle_count = 2
+        particle_generator.particle_count = 1
         particle_generator.particle_maxdistancefromother = particle_maxdistancefromother
         particle_generator.particle_array = [] # start with an empty list
         particle_generator.anomoly_count = anomoly_count
@@ -487,19 +502,18 @@ class particle_generate_twirl(particle_generator):
         self.myparticlemotion = particle_motion_twirl(self.center_x, self.center_y)
         
         particle_radius = 2
-        particle_vector_x = 0
-        particle_vector_y = 0
-        isAnomoly = False
-        particle_x = self.center_x
-        particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
-
-        particle_y = self.center_y-25
-        myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, particle_vector_x, particle_vector_y, isAnomoly, self.particle_maxdistancefromother, self.myparticlemotion)
-
-        particle_y = self.center_y+25
-        myparticle2 = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, particle_vector_x, particle_vector_y, isAnomoly, self.particle_maxdistancefromother, self.myparticlemotion)
-        self.particle_array.append(myparticle) # top of 1st story, upper left
-        self.particle_array.append(myparticle2) # top of 1st story, upper left
+        particle_vector_x = random.randint(1, particle_generator.surface_width)
+        particle_vector_y = random.randint(1, 4)
+        particle_number = 1
+        for particle_number in range(self.particle_count):
+            isAnomoly = False
+            if (particle_number < self.anomoly_count):
+                isAnomoly = True
+            particle_x = particle_vector_x
+            particle_y = random.randint(particle_generator.surface_height*-1, 0)
+            particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
+            myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, particle_vector_x, particle_vector_y, isAnomoly, self.particle_maxdistancefromother, self.myparticlemotion)
+            self.particle_array.append(myparticle) # top of 1st story, upper left
 
     def update(self, *args):
         particle_generator.update(self, *args)
@@ -533,7 +547,7 @@ def main():
 
     # create a surface on screen that has the size of screen_width x screen_height
     screen = pygame.display.set_mode((screen_width,screen_height))
-    myparticle_generator = particle_generate_twirl(screen, particle_count, particle_maxdistancefromother, particle_anomolycount);
+    myparticle_generator = particle_generate_falling_straight(screen, particle_count, particle_maxdistancefromother, particle_anomolycount);
     #myparticle_connector = particle_connector(screen, myparticle_generator.get_particle_array());
     # define a variable to control the main loop
     running = True
