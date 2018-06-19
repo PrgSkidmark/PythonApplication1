@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>62e52934-0772-4f2c-9b95-72659ad2fb14</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>particle2.py</StartupFile>
+    <StartupFile>particle3.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

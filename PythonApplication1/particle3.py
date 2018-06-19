@@ -2,6 +2,7 @@
 # import the pygame module, so you can use it
 import pygame
 import random
+import math
 from collections import namedtuple
 from pygame import gfxdraw
 
@@ -43,6 +44,32 @@ class particle:
         
     def update(self, *args):
         self.particle_motion.update(self)
+
+class particle_motion_none():
+    def update(self, particle):
+        particle.isattop = False
+        particle.changeddirection = False
+
+class particle_motion_twirl():
+    def __init__(self, *args):
+        self.t = 0
+        self.adder = (2*3.14158)/360
+        self.degree = 1
+        self.a = 75
+        self.b = 25
+        self.center_x = args[0]
+        self.center_y = args[1]
+
+    def update(self, particle):
+        particle.isattop = False
+        particle.changeddirection = False
+        particle.x = self.center_x + int(self.a * math.cos(self.adder*self.degree))
+        particle.y = self.center_y + int(self.b * math.sin(self.adder*self.degree))
+
+        self.degree += 3
+        if (self.degree == 361):
+            self.degree = 1
+
 
 class particle_motion_wrapsides():
     def update(self, particle):
@@ -121,9 +148,32 @@ class particle_motion_down_straight():
             particle.isattop = False
             particle.changeddirection = False
 
+class particle_motion_down_zigzag():
+    def update(self, particle):
+        particle.x += particle.vector_x
+        particle.y += particle.vector_y
+        if particle.y > particle.height:
+            particle.isattop = False
+            particle.y = -10
+            particle.vector_x = random.randint(-4, 4)
+            #particle.vector_y = random.randint(-2, 2)
+            particle.changeddirection = True
+        elif particle.x > particle.width:
+            particle.x = 1
+            #particle.vector_x = random.randint(-2, 2)
+            #particle.vector_y = random.randint(-2, 2)
+            particle.changeddirection = True
+        elif particle.x < 1:
+            particle.x = particle.width
+            #particle.vector_x = random.randint(-2, 2)
+            #self.vector_y = random.randint(-2, 2)
+            particle.changeddirection = True
+        else:
+            particle.isattop = False
+            particle.changeddirection = False
+        while (particle.vector_x == 0):
+            particle.vector_x = random.randint(-4, 4)
 
-#class particle_motion_down_any(particle):
-#    def __init__(self, particle):
 class particle_connector:
     def __init__(self, surface, particle_array):
         self.surface = surface
@@ -394,7 +444,62 @@ class particle_generate_falling_zigzag(particle_generator):
         particle_generator.particle_maxdistancefromother = particle_maxdistancefromother
         particle_generator.particle_array = [] # start with an empty list
         particle_generator.anomoly_count = anomoly_count
-        #self.myparticlemotion = particle_motion_down_straight()
+        self.myparticlemotion = particle_motion_down_zigzag()
+        particle_number = 1
+        for particle_number in range(self.particle_count):
+            isAnomoly = False
+            if (particle_number < self.anomoly_count):
+                isAnomoly = True
+            particle_x = random.randint(1, particle_generator.surface_width)
+            particle_y = random.randint(particle_generator.surface_height*-1, 0)
+            particle_radius = random.randint(1, 2)
+            particle_vector_x = random.randint(-4, 4)
+            particle_vector_y = random.randint(1, 6)
+            particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
+            myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, particle_vector_x, particle_vector_y, isAnomoly, self.particle_maxdistancefromother, self.myparticlemotion)
+
+            self.particle_array.append(myparticle) # top of 1st story, upper left
+    def update(self, *args):
+        particle_generator.update(self, *args)
+        particle_generator.render(self, *args)
+
+    def reset(self, *args):
+        particle_generator.reset(self, *args)
+    
+    def pause(self, *args):
+        particle_generator.pause(self, *args)
+    
+    def get_particle_array(self, *args):
+        particle_generator.get_particle_array(self, *args)
+
+class particle_generate_twirl(particle_generator):
+    def __init__(self, surface, particle_count, particle_maxdistancefromother, anomoly_count):
+        particle_generator.pausing = False
+        particle_generator.surface = surface
+        particle_generator.surface_width = surface.get_width()
+        particle_generator.surface_height = surface.get_height()
+        particle_generator.particle_count = 2
+        particle_generator.particle_maxdistancefromother = particle_maxdistancefromother
+        particle_generator.particle_array = [] # start with an empty list
+        particle_generator.anomoly_count = anomoly_count
+        self.center_x = int(particle_generator.surface_width/2)
+        self.center_y = int(particle_generator.surface_height/2)
+        self.myparticlemotion = particle_motion_twirl(self.center_x, self.center_y)
+        
+        particle_radius = 2
+        particle_vector_x = 0
+        particle_vector_y = 0
+        isAnomoly = False
+        particle_x = self.center_x
+        particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
+
+        particle_y = self.center_y-25
+        myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, particle_vector_x, particle_vector_y, isAnomoly, self.particle_maxdistancefromother, self.myparticlemotion)
+
+        particle_y = self.center_y+25
+        myparticle2 = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, particle_vector_x, particle_vector_y, isAnomoly, self.particle_maxdistancefromother, self.myparticlemotion)
+        self.particle_array.append(myparticle) # top of 1st story, upper left
+        self.particle_array.append(myparticle2) # top of 1st story, upper left
 
     def update(self, *args):
         particle_generator.update(self, *args)
@@ -408,6 +513,7 @@ class particle_generate_falling_zigzag(particle_generator):
     
     def get_particle_array(self, *args):
         particle_generator.get_particle_array(self, *args)
+
 # define a main function
 def main():
      
@@ -427,9 +533,8 @@ def main():
 
     # create a surface on screen that has the size of screen_width x screen_height
     screen = pygame.display.set_mode((screen_width,screen_height))
-    myparticle_generator = particle_generate_wraparound(screen, particle_count, particle_maxdistancefromother, particle_anomolycount);
-    myparticle_connector = particle_connector(screen, myparticle_generator.get_particle_array());
-
+    myparticle_generator = particle_generate_twirl(screen, particle_count, particle_maxdistancefromother, particle_anomolycount);
+    #myparticle_connector = particle_connector(screen, myparticle_generator.get_particle_array());
     # define a variable to control the main loop
     running = True
     clock = pygame.time.Clock()
@@ -466,7 +571,7 @@ def main():
 
         #screen.blit(bg_image, (0, 0))
         screen.fill((0,0,0))
-        myparticle_connector.update()
+        #myparticle_connector.update()
         myparticle_generator.update()
         # draw anim
         #dirty_rect = screen.blit(100, 240)
