@@ -81,7 +81,6 @@ class particle_motion_twirl(paticle_motion):
     def update(self, particle):
         self.a = particle.ellipse_width
         self.b = particle.ellipse_height
-        #trails
         particle_previous_frame = (particle.x, particle.y, particle.color)
         particle.previous_frames.append(particle_previous_frame)
         if (len(particle.previous_frames) > 20):
@@ -102,6 +101,34 @@ class particle_motion_twirl(paticle_motion):
         particle.frame_number += 6
         if (particle.frame_number == particle.frame_count):
             particle.frame_number = 1
+
+
+class particle_motion_trajectory(paticle_motion):
+    def init_vector(self, particle):
+        particle.vector_x = 10
+        particle.vector_y = random.randint(50,100) #velocity
+        #particle.frame_number = 1
+        #particle.frame_count = 1000
+        self.angle = 50
+
+    def update(self, particle):
+        particle.x += particle.vector_x
+        particle_y = particle.init_y - int(particle.x*math.tan(math.radians(self.angle))-((9.8*particle.x**2)/(2*particle.vector_y**2*math.cos(math.radians((self.angle)))**2)))
+        particle.y = particle_y
+        #trails
+        particle_previous_frame = (particle.x, particle.y, particle.color)
+        particle.previous_frames.append(particle_previous_frame)
+        if (len(particle.previous_frames) > 20):
+            particle.previous_frames.pop(0)
+        if particle.y > particle.height:
+            particle.isattop = True
+            particle.x = particle.init_x
+            particle.y = particle.init_y
+            particle.changeddirection = True
+        else:
+            particle.isattop = False
+            particle.changeddirection = False
+
 
 class particle_motion_wrapsides(paticle_motion):
     def init_vector(self, particle):
@@ -276,6 +303,37 @@ class particle_placement_topdeadcenter(particle_placement):
 
             self.particle_array.append(myparticle) # top of 1st story, upper left
 
+
+class particle_placement_insidecannon(particle_placement):
+    def __init__(self, surface_width, surface_height, particle_array, particle_count, anomoly_count, particle_maxdistancefromother, particle_motion_selected):
+        self.surface_width = surface_width
+        self.surface_height = surface_height
+        self.particle_array = particle_array
+        self.particle_count = particle_count
+        self.anomoly_count = anomoly_count
+        self.particle_maxdistancefromother = particle_maxdistancefromother
+        self.particle_motion_selected = particle_motion_selected
+        particle_number = 1
+        for particle_number in range(self.particle_count):
+            isAnomoly = False
+            if (particle_number < self.anomoly_count):
+                isAnomoly = True
+            particle_x = -4
+            particle_y = int(self.surface_height/2)
+            particle_radius = random.randint(1, 2)
+            particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
+            myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, isAnomoly, self.particle_maxdistancefromother, self.particle_motion_selected)
+
+            self.particle_array.append(myparticle) # top of 1st story, upper left
+
+    def reset(self, *args):
+        particle_number = 1
+        for particle in self.particle_array:
+            particle.x = -4
+            particle.y = int(self.surface_height/2)
+            particle.size = random.randint(1, 2)
+            particle.color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
+
 class particle_generator(object):
     def __init__(self, surface, particle_count, particle_maxdistancefromother, anomoly_count):
         self.pausing = False
@@ -325,8 +383,8 @@ class particle_generate_onetype(particle_generator):
         particle_generator.particle_maxdistancefromother = particle_maxdistancefromother
         particle_generator.particle_array = [] # start with an empty list
         particle_generator.anomoly_count = anomoly_count
-        self.particle_motion_selected = particle_motion_twirl()
-        self.particle_placement_selected = particle_placement_random(particle_generator.surface_width, particle_generator.surface_height, particle_generator.particle_array, particle_generator.particle_count, particle_generator.anomoly_count, particle_generator.particle_maxdistancefromother, self.particle_motion_selected)
+        self.particle_motion_selected = particle_motion_trajectory()
+        self.particle_placement_selected = particle_placement_insidecannon(particle_generator.surface_width, particle_generator.surface_height, particle_generator.particle_array, particle_generator.particle_count, particle_generator.anomoly_count, particle_generator.particle_maxdistancefromother, self.particle_motion_selected)
 
     def update(self, *args):
         particle_generator.update(self, *args)
@@ -340,6 +398,11 @@ class particle_generate_onetype(particle_generator):
     
     def get_particle_array(self, *args):
         particle_generator.get_particle_array(self, *args)
+
+    def mousescrollup(self, *args):
+        pass
+    def mousescrolldown(self, *args):
+        pass
 
 class particle_connector:
     def __init__(self, surface, particle_array):
@@ -510,10 +573,17 @@ def main():
     while running:
         # event handling, gets all event from the eventqueue
         for event in pygame.event.get():
-            #if event.type == pygame.MOUSEBUTTONDOWN:
-            #
-            #elif event.type == pygame.MOUSEBUTTONUP:
-            #
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 4:   # increase velocity
+                    pass
+                if event.button == 5:   # increase velocity
+                    pass
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 4:   # increase velocity
+                    pass
+                if event.button == 5:   # increase velocity
+                    pass
+            
             #elif event.type == pygame.MOUSEMOTION:
             if event.type == pygame.MOUSEMOTION:
                 particle_generator_selected.mousemotion(event.pos)
@@ -538,12 +608,12 @@ def main():
                     particle_generator_selected.reset(None)
                 if event.key == pygame.K_SPACE:
                     particle_generator_selected.pause()
-                if event.key == pygame.K_1:
-                    particle_generator_selected.setstyle(1)
-                if event.key == pygame.K_2:
-                    particle_generator_selected.setstyle(2)
-                if event.key == pygame.K_3:
-                    particle_generator_selected.setstyle(3)
+                #if event.key == pygame.K_1:
+                #    particle_generator_selected.setstyle(1)
+                #if event.key == pygame.K_2:
+                #    particle_generator_selected.setstyle(2)
+                #if event.key == pygame.K_3:
+                #    particle_generator_selected.setstyle(3)
 
             # only do something if the event is of type QUIT
             if event.type == pygame.QUIT:
