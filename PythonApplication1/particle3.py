@@ -25,6 +25,9 @@ class particle:
         self.changeddirection = False
         self.frame_number = 1
         self.frame_count = 360
+        self.previous_frames = []
+        self.ellipse_width = 100
+        self.ellipse_height = 10
         self.particle_motion.init_vector(self)
 
     def reset(self, x, y, size, color, isanomoly, particle_distance, particle_motion):
@@ -41,6 +44,9 @@ class particle:
         self.changeddirection = False
         self.frame_number = 1
         self.frame_count = 360
+        self.previous_frames = []
+        self.ellipse_width = 100
+        self.ellipse_height = 10
         if (self.particle_motion != None):
             self.particle_motion.init_vector(self)
         
@@ -61,16 +67,22 @@ class particle_motion_none(paticle_motion):
 
 class particle_motion_twirl(paticle_motion):
     def init_vector(self, particle):
-        particle_vector_y = random.randint(1, 8)
+        particle_vector_y = random.randint(0, 4)
         particle.vector_x = 0
         particle.vector_y = particle_vector_y
         particle.frame_number = random.randint(1, particle.frame_count-1)
+        particle.ellipse_width = random.randint(100,400)
+        particle.ellipse_height = random.randint(10,60)
         self.t = 0
         self.adder = (2*3.14159)/360
-        self.a = 100
-        self.b = 10
+        self.a = particle.ellipse_width
+        self.b = particle.ellipse_height
 
     def update(self, particle):
+        particle_previous_frame = (particle.x, particle.y, particle.color)
+        particle.previous_frames.append(particle_previous_frame)
+        if (len(particle.previous_frames) > 20):
+            particle.previous_frames.pop(0)
         if particle.y > particle.height:
             particle.isattop = True
             particle.y = 1
@@ -284,6 +296,9 @@ class particle_generator(object):
     def render(self, *args):
         for particle in self.particle_array:
             gfxdraw.filled_circle(self.surface, particle.x, particle.y, particle.size, particle.color)
+            for particle_frame in particle.previous_frames:
+                gfxdraw.filled_circle(self.surface, particle_frame[0], particle_frame[1], particle.size, particle_frame[2])
+                
 
     def reset(self, *args):
         pass
