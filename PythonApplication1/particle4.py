@@ -28,11 +28,8 @@ class particle:
         self.previous_frames = []
         self.ellipse_width = 100
         self.ellipse_height = 10
-        self.particle_motion.init_vector(self)
         self.vector_x = 0
-        self.vector_y = 1
-        self.set_vector_x(0)
-        self.set_vector_y(1)
+        self.vector_y = 0
 
     def reset(self, x, y, size, color, isanomoly, particle_distance, particle_motion):
         self.x = x
@@ -52,9 +49,7 @@ class particle:
         self.ellipse_width = 100
         self.ellipse_height = 10
         self.vector_x = 0
-        self.vector_y = 1
-        if (self.particle_motion != None):
-            self.particle_motion.init_vector(self)
+        self.vector_y = 0
        
     def get_vector_x(self, *args):
         return self.vector_x
@@ -121,11 +116,17 @@ class particle_motion_twirl(paticle_motion):
 
 class particle_motion_trajectory(paticle_motion):
     def init_vector(self, particle):
-        particle_vector_y = random.randint(50,100) #velocity
-        particle.set_vector_x( 0)
+        particle_vector_y = int(random.randint(75,120)/particle.size) #velocity
+        particle.set_vector_x(0)
         particle.set_vector_y(particle_vector_y)
-        #particle.vector_x = 0
-        #particle.vector_y = particle_vector_y
+        #particle.vector_x = 17
+        #particle.vector_y = 17
+        #particle_vector_x = particle.get_vector_x(particle)
+        #particle_vector_y = particle.get_vector_y(particle)
+        #particle.set_vector_x(16)
+        #particle.set_vector_y(16)
+        #particle_vector_x = particle.get_vector_x(particle)
+        #particle_vector_y = particle.get_vector_y(particle)
         particle.frame_number = random.randint(1, 499) # Keep them from slurting out at once
         particle.frame_count = 500
         self.angle = 50
@@ -300,7 +301,7 @@ class particle_placement_random(particle_placement):
                 isAnomoly = True
             particle_x = random.randint(1, self.surface_width)
             particle_y = random.randint(1, self.surface_height)
-            particle_radius = random.randint(1, 2)
+            particle_radius = random.randint(1, 3)
             particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
             myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, isAnomoly, self.particle_maxdistancefromother, self.particle_motion_selected)
 
@@ -361,7 +362,7 @@ class particle_placement_insidecannon(particle_placement):
             particle_radius = random.randint(1, 2)
             particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
             myparticle = particle(self.surface_width, self.surface_height, particle_x, particle_y, particle_radius, particle_color, isAnomoly, self.particle_maxdistancefromother, self.particle_motion_selected)
-
+            self.particle_motion_selected.init_vector(myparticle);
             self.particle_array.append(myparticle) # top of 1st story, upper left
 
     def reset(self, *args):
@@ -594,7 +595,7 @@ def main():
 
     screen_width = 1500
     screen_height = 800
-    particle_count = 100
+    particle_count = 2000
     particle_maxdistancefromother = 100
     particle_anomolycount = 1
     bg_image = pygame.image.load("spacee-740x463.jpg")
@@ -641,6 +642,9 @@ def main():
                     particle_generator_selected.reset(new_motion)
                 if event.key == pygame.K_F5:
                     new_motion = particle_motion_wrapsides()
+                    particle_generator_selected.reset(new_motion)
+                if event.key == pygame.K_F6:
+                    new_motion = particle_motion_trajectory()
                     particle_generator_selected.reset(new_motion)
                 if event.key == pygame.K_RETURN:
                     particle_generator_selected.reset(None)
