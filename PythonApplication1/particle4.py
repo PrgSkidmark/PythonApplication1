@@ -29,6 +29,10 @@ class particle:
         self.ellipse_width = 100
         self.ellipse_height = 10
         self.particle_motion.init_vector(self)
+        self.vector_x = 0
+        self.vector_y = 1
+        self.set_vector_x(0)
+        self.set_vector_y(1)
 
     def reset(self, x, y, size, color, isanomoly, particle_distance, particle_motion):
         self.x = x
@@ -47,9 +51,19 @@ class particle:
         self.previous_frames = []
         self.ellipse_width = 100
         self.ellipse_height = 10
+        self.vector_x = 0
+        self.vector_y = 1
         if (self.particle_motion != None):
             self.particle_motion.init_vector(self)
-        
+       
+    def get_vector_x(self, *args):
+        return self.vector_x
+    def get_vector_y(self, *args):
+        return self.vector_y
+    def set_vector_x(self, new_vector_x):
+        self.vector_x = new_vector_x
+    def set_vector_y(self, new_vector_y):
+        self.vector_y = new_vector_y
     def update(self, *args):
         self.particle_motion.update(self)
 
@@ -58,8 +72,8 @@ class paticle_motion(object):
 
 class particle_motion_none(paticle_motion):
     def init_vector(self, particle):
-        particle_vector_x = 0
-        particle_vector_y = 0
+        particle.set_vector_x(0)
+        particle.set_vector_y(0)
 
     def update(self, particle):
         particle.isattop = False
@@ -68,8 +82,11 @@ class particle_motion_none(paticle_motion):
 class particle_motion_twirl(paticle_motion):
     def init_vector(self, particle):
         particle_vector_y = random.randint(0, 4)
-        particle.vector_x = 0
-        particle.vector_y = particle_vector_y
+        #particle.vector_x = 0
+        #particle.vector_y = particle_vector_y
+        particle.set_vector_x(0)
+        particle.set_vector_y(particle_vector_y)
+
         particle.frame_number = random.randint(1, particle.frame_count-1)
         particle.ellipse_width = random.randint(100,400)
         particle.ellipse_height = random.randint(10,60)
@@ -102,26 +119,37 @@ class particle_motion_twirl(paticle_motion):
         if (particle.frame_number == particle.frame_count):
             particle.frame_number = 1
 
-
 class particle_motion_trajectory(paticle_motion):
     def init_vector(self, particle):
-        particle.vector_x = 10
-        particle.vector_y = random.randint(50,100) #velocity
-        #particle.frame_number = 1
-        #particle.frame_count = 1000
+        particle_vector_y = random.randint(50,100) #velocity
+        particle.set_vector_x( 0)
+        particle.set_vector_y(particle_vector_y)
+        #particle.vector_x = 0
+        #particle.vector_y = particle_vector_y
+        particle.frame_number = random.randint(1, 499) # Keep them from slurting out at once
+        particle.frame_count = 500
         self.angle = 50
 
+
     def update(self, particle):
-        particle.x += particle.vector_x
-        particle_y = particle.init_y - int(particle.x*math.tan(math.radians(self.angle))-((9.8*particle.x**2)/(2*particle.vector_y**2*math.cos(math.radians((self.angle)))**2)))
+        if (particle.frame_number == 1):
+            particle.vector_x = 10
+            #particle.set_vector_x(10)
+        particle_vector_x = particle.get_vector_x(particle)
+        particle_vector_y = particle.get_vector_y(particle)
+        #particle_vector_x = particle.vector_x
+        #particle_vector_y = particle.vector_y
+        particle.x += particle_vector_x
+        particle_y = particle.init_y - int(particle.x*math.tan(math.radians(self.angle))-((9.8*particle.x**2)/(2*particle_vector_y**2*math.cos(math.radians((self.angle)))**2)))
         particle.y = particle_y
         #trails
-        particle_previous_frame = (particle.x, particle.y, particle.color)
-        particle.previous_frames.append(particle_previous_frame)
-        if (len(particle.previous_frames) > 20):
-            particle.previous_frames.pop(0)
+        #particle_previous_frame = (particle.x, particle.y, particle.color)
+        #particle.previous_frames.append(particle_previous_frame)
+        #if (len(particle.previous_frames) > 20):
+        #    particle.previous_frames.pop(0)
         if particle.y > particle.height:
             particle.isattop = True
+            particle.set_vector_x(0)
             particle.x = particle.init_x
             particle.y = particle.init_y
             particle.changeddirection = True
@@ -129,6 +157,16 @@ class particle_motion_trajectory(paticle_motion):
             particle.isattop = False
             particle.changeddirection = False
 
+        particle.frame_number += 1
+        if (particle.frame_number == particle.frame_count):
+            particle.frame_number = 1
+            particle.x = particle.init_x
+            particle.y = particle.init_y
+
+    def mousescrollup(self, *args):
+        particle.set_vector_y(particle.get_vector_y(particle)+1)
+    def mousescrolldown(self, *args):
+        particle.set_vector_y(particle.get_vector_y(particle)-1)
 
 class particle_motion_wrapsides(paticle_motion):
     def init_vector(self, particle):
@@ -400,9 +438,9 @@ class particle_generate_onetype(particle_generator):
         particle_generator.get_particle_array(self, *args)
 
     def mousescrollup(self, *args):
-        pass
+        self.particle_motion_selected.mousescrollup(self, *args)
     def mousescrolldown(self, *args):
-        pass
+        self.particle_motion_selected.mousescrolldown(self, *args)
 
 class particle_connector:
     def __init__(self, surface, particle_array):
@@ -575,14 +613,14 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:   # increase velocity
-                    pass
-                if event.button == 5:   # increase velocity
-                    pass
+                    particle_generator_selected.mousescrollup()
+                if event.button == 5:   # decrease velocity
+                    particle_generator_selected.mousescrolldown()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 4:   # increase velocity
-                    pass
-                if event.button == 5:   # increase velocity
-                    pass
+                    particle_generator_selected.mousescrollup()
+                if event.button == 5:   # decrease velocity
+                    particle_generator_selected.mousescrolldown()
             
             #elif event.type == pygame.MOUSEMOTION:
             if event.type == pygame.MOUSEMOTION:
