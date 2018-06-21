@@ -140,7 +140,10 @@ class particle_motion_trajectory(paticle_motion):
         particle_vector_y = particle.get_vector_y(particle)
         #particle_vector_x = particle.vector_x
         #particle_vector_y = particle.vector_y
-        particle.x += particle_vector_x
+        if (particle.init_x < 0):
+            particle.x += particle_vector_x
+        else:
+            particle.x += particle_vector_x*-1
         particle_y = particle.init_y - int(particle.x*math.tan(math.radians(self.angle))-((9.8*particle.x**2)/(2*particle_vector_y**2*math.cos(math.radians((self.angle)))**2)))
         particle.y = particle_y
         #trails
@@ -357,7 +360,11 @@ class particle_placement_insidecannon(particle_placement):
             isAnomoly = False
             if (particle_number < self.anomoly_count):
                 isAnomoly = True
-            particle_x = -4
+            if (particle_number < (particle_count/2)):
+                particle_x = -4
+            else:
+                particle_x = self.surface_width+4
+
             particle_y = int(self.surface_height/2)
             particle_radius = random.randint(1, 2)
             particle_color = (int(random.randint(0, 255)), int(random.randint(0, 255)), int(random.randint(0, 255)))
