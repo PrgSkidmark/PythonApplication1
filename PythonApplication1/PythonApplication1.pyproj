@@ -28,6 +28,7 @@
     <Compile Include="module1.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="particle5.py" />
     <Compile Include="particle4.py" />
     <Compile Include="particle3.py" />
     <Compile Include="particle2.py" />
