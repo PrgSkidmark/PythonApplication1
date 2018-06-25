@@ -69,10 +69,10 @@ class particle_motion(object):
 
 class particle_motion_trajectory(particle_motion):
     def init_vector(self, particle):
-        particle_vector_y = random.randint(10,70) #velocity
+        particle_vector_y = random.randint(10,20) #velocity
         particle.set_vector_x(1)
         particle.set_vector_y(particle_vector_y)
-        particle.initial_angle = random.randint(50, 89)
+        particle.initial_angle = random.randint(50, 70)
 
     def update(self, particle):
         particle_xOffset = int(particle.width/2)
