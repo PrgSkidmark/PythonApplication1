@@ -2,6 +2,7 @@
 import pygame
 import random
 import math
+import copy
 from collections import namedtuple
 from pygame import gfxdraw
 
@@ -23,8 +24,8 @@ def drawboard(surface, screen_width, screen_height):
         pygame.draw.line(surface, (100,100,100), (left,top), (left,screen_height), 1)
 
 def drawpattern(surface, screen_width, screen_height, pattern):
-    rowcount = 100
-    colcount = 100
+    rowcount = 122
+    colcount = 122
 
     mingridsize = min(screen_width/colcount, screen_height/rowcount)
     row_number = 1
@@ -40,41 +41,96 @@ def drawpattern(surface, screen_width, screen_height, pattern):
 
 def createnextpattern(pattern):
     newpattern = []
-    row_number = 1
-    for row_number in range(len(pattern)):
-        newpattern.append(pattern[row_number-1].copy())
-        #col_number = 1
-        #newrow = []
-        #for col_number in range(len(pattern[row_number-1])):
-        #    newrow.pu
-        #    newpattern[row_number-1][col_number-1] = pattern[row_number-1][col_number-1]
 
-    row_number = 2
-    for row_number in range(len(pattern)):
-        col_number = 2
-        for col_number in range(len(pattern[row_number-1])):
-            #Fewer than 2 live neighbors, Underpopulation
-            if (pattern[row_number-1][col_number-1] ==1):
-                neighbortotal = pattern[row_number-2][col_number-2]+pattern[row_number-2][col_number-1]+pattern[row_number-2][col_number]+pattern[row_number-1][col_number]+pattern[row_number][col_number]+pattern[row_number][col_number-1]+pattern[row_number][col_number-2]+pattern[row_number-1][col_number-2]
-                if (neighbortotal < 2):
-                    newpattern[row_number-1][col_number-1] = 0
+    row_number = 0
+    row_count = len(pattern)
+    for row_number in range(row_count):
+        newrow = []
+        col_number = 0
+        col_count = len(pattern[row_number])
+        for col_number in range(col_count):
+            value = copy.deepcopy(pattern[row_number][col_number])
+            NW = 0
+            if (row_number > 0) and (col_number > 0):
+                NW = pattern[row_number-1][col_number-1]
+            N = 0
+            if (row_number > 0):
+                N = pattern[row_number-1][col_number]
+            NE = 0
+            if (row_number > 0) and (col_number < col_count-1):
+                NE = pattern[row_number-1][col_number+1]
+            E = 0
+            if (col_number < col_count-1):
+                E = pattern[row_number][col_number+1]
+            SE = 0
+            if (row_number < row_count-1) and (col_number < col_count-1):
+                SE = pattern[row_number+1][col_number+1]
+            S = 0
+            if (row_number < row_count-1):
+                S = pattern[row_number+1][col_number]
+            SW = 0
+            if (row_number < row_count-1) and (col_number > 0):
+                SW = pattern[row_number+1][col_number-1]
+            W = 0
+            if (col_number > 0):
+                W = pattern[row_number][col_number-1]
+            neighbortotal = NW+N+NE+E+SE+S+SW+W
+            #Fewer than 2 live neighbors, dies from Underpopulation
+            if (pattern[row_number][col_number] == 1) and (neighbortotal < 2):
+                    value = 0
             #Has 2 or 3 live neighbors, Still Lives
-            if (pattern[row_number-1][col_number-1] == 1):
-                neighbortotal = pattern[row_number-2][col_number-2]+pattern[row_number-2][col_number-1]+pattern[row_number-2][col_number]+pattern[row_number-1][col_number]+pattern[row_number][col_number]+pattern[row_number][col_number-1]+pattern[row_number][col_number-2]+pattern[row_number-1][col_number-2]
-                if (neighbortotal == 2) or (neighbortotal == 3):
-                    newpattern[row_number-1][col_number-1] = 1
-            #More than 3 live neighbors, overpopulation
-            if (pattern[row_number-1][col_number-1] ==1):
-                neighbortotal = pattern[row_number-2][col_number-2]+pattern[row_number-2][col_number-1]+pattern[row_number-2][col_number]+pattern[row_number-1][col_number]+pattern[row_number][col_number]+pattern[row_number][col_number-1]+pattern[row_number][col_number-2]+pattern[row_number-1][col_number-2]
-                if (neighbortotal > 3):
-                    newpattern[row_number-1][col_number-1] = 0
+            #if (pattern[row_number-1][col_number-1] == 1):
+            #    if (neighbortotal == 2) or (neighbortotal == 3):
+            #        newpattern[row_number-1][col_number-1] = 1
+            #More than 3 live neighbors, dies from overpopulation
+            if (pattern[row_number][col_number] == 1) and (neighbortotal > 3):
+                    value = 0
             #Dead with exactly 3 live neighbors, reproduction
-            if (pattern[row_number-1][col_number-1] ==0):
-                neighbortotal = pattern[row_number-2][col_number-2]+pattern[row_number-2][col_number-1]+pattern[row_number-2][col_number]+pattern[row_number-1][col_number]+pattern[row_number][col_number]+pattern[row_number][col_number-1]+pattern[row_number][col_number-2]+pattern[row_number-1][col_number-2]
-                if (neighbortotal == 3):
-                    newpattern[row_number-1][col_number-1] = 1
+            if (pattern[row_number][col_number] == 0) and (neighbortotal == 3):
+                    value = 1
+            newrow.append(value)
+        newpattern.append(newrow)
     return newpattern
 
+def centerpattern(pattern, grid_width, grid_height):
+    pattern_width = len(pattern[0])
+    pattern_height = len(pattern)
+
+    emptycells_width = int((grid_width - pattern_width)/2)
+    emptycells_height = int((grid_height - pattern_height)/2)
+
+    fill_width = (emptycells_width*2) + pattern_width
+    newpattern = []
+    
+    row_number = 1
+    for row_number in range(emptycells_height):
+        newrow = []
+        col_number = 1
+        for col_number in range(fill_width):
+            newrow.append(0)
+        newpattern.append(newrow)
+    row_number = 0
+    for row_number in range(pattern_height):
+        newrow = []
+        col_number = 1
+        for col_number in range(emptycells_width):
+            newrow.append(0)
+        col_number = 0
+        for col_number in range(pattern_width):
+            newrow.append(int(pattern[row_number][col_number]))
+        col_number = 1
+        for col_number in range(emptycells_width):
+            newrow.append(0)
+        newpattern.append(newrow)
+    row_number = 1
+    for row_number in range(emptycells_height):
+        newrow = []
+        col_number = 1
+        for col_number in range(fill_width):
+            newrow.append(0)
+        newpattern.append(newrow)
+
+    return newpattern
 # define a main function
 def main():
      
@@ -85,7 +141,7 @@ def main():
     pygame.display.set_icon(logo)
     pygame.display.set_caption("minimal program")
 
-    screen_width = 1500
+    screen_width = 800
     screen_height = 800
     particle_count = 10
     particle_maxdistancefromother = 100
@@ -95,12 +151,62 @@ def main():
     # create a surface on screen that has the size of screen_width x screen_height
     screen = pygame.display.set_mode((screen_width,screen_height))
 
-    seedpattern = [[0,0,0,0,0],[0,0,0,0,0],[0,1,1,1,0],[0,0,0,0,0],[0,0,0,0,0]]
-    currentpattern = seedpattern
+    seedpattern = [[0,0,0,0,0],
+                   [0,0,0,0,0],
+                   [0,1,1,1,0],
+                   [0,0,0,0,0],
+                   [0,0,0,0,0]]
+    acornpattern = [[0,0,0,0,0,0,0,0,0],
+                    [0,0,1,0,0,0,0,0,0],
+                    [0,0,0,0,1,0,0,0,0],
+                    [0,1,1,0,0,1,1,1,0],
+                    [0,0,0,0,0,0,0,0,0]]
+    toadpattern = [[0,0,0,0,0,0],
+                   [0,0,0,0,0,0],
+                   [0,0,1,1,1,0],
+                   [0,1,1,1,0,0],
+                   [0,0,0,0,0,0],
+                   [0,0,0,0,0,0]]
+    beaconpattern = [[0,0,0,0,0,0],
+                     [0,1,1,0,0,0],
+                     [0,1,1,0,0,0],
+                     [0,0,0,1,1,0],
+                     [0,0,0,1,1,0],
+                     [0,0,0,0,0,0]]
+    pulsarpattern = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+                     [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+                     [0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0],
+                     [0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0],
+                     [0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0],
+                     [0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0],
+                     [0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                     [0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0],
+                     [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+                     [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+    gunpattern = [
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],
+        [0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+    currentpattern = centerpattern(gunpattern, 120, 120)
     # define a variable to control the main loop
     running = True
     clock = pygame.time.Clock()
-    fps = 10
+    fps = 2
     # main loop
     while running:
         # event handling, gets all event from the eventqueue
