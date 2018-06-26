@@ -4,7 +4,11 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>62e52934-0772-4f2c-9b95-72659ad2fb14</ProjectGuid>
     <ProjectHome>.</ProjectHome>
+<<<<<<< HEAD
     <StartupFile>particle6.py</StartupFile>
+=======
+    <StartupFile>conwaygameoflife.py</StartupFile>
+>>>>>>> bc3a88c4c9ca8632bc326301f5f05776a775baf2
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -28,7 +32,12 @@
     <Compile Include="module1.py">
       <SubType>Code</SubType>
     </Compile>
+<<<<<<< HEAD
     <Compile Include="particle6.py" />
+=======
+    <Compile Include="conwaygameoflife.py" />
+    <Compile Include="trajectory.py" />
+>>>>>>> bc3a88c4c9ca8632bc326301f5f05776a775baf2
     <Compile Include="particle5.py" />
     <Compile Include="particle4.py" />
     <Compile Include="particle3.py" />
